@@ -53,7 +53,7 @@ export const getPlans = async (req, res) => {
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
-//API Conroller for purchasing a plan
+//API Controller for purchasing a plan
 export const purchasePlan = async (req, res) => {
   try {
     const { planId } = req.body;
@@ -61,7 +61,7 @@ export const purchasePlan = async (req, res) => {
     const plan = plans.find((plan) => plan._id === planId);
 
     if (!plan) {
-      return req.json({ success: false, message: "Invalid plan" });
+      return res.json({ success: false, message: "Invalid plan" });
     }
 
     //Create new Transaction
@@ -90,7 +90,10 @@ export const purchasePlan = async (req, res) => {
       mode: "payment",
       success_url: `${origin}/loading`,
       cancel_url: `${origin}`,
-      metadata: { transactionId: transaction._id.toString, appI: "promptlyai" },
+      metadata: {
+        transactionId: transaction._id.toString(),
+        appId: "promptlyai",
+      },
       expires_at: Math.floor(Date.now() / 1000) + 30 * 60,
     });
 

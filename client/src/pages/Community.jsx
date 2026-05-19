@@ -30,6 +30,7 @@ const Community = () => {
               key={index}
               href={item.imageUrl}
               target="_blank"
+              rel="noopener noreferrer"
               className="relative group block rounded-lg overflow-hidden border border-gray-200 dark:border-purple-700 shadow-sm hover:shadow-md transition-shadow duration-300"
             >
               <img

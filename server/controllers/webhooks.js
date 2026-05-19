@@ -29,7 +29,7 @@ export const stripeWebhooks = async (request, response) => {
         const session = sessionList.data[0];
         const { transactionId, appId } = session.metadata;
 
-        if (appId === "promplyai") {
+        if (appId === "promptlyai") {
           const transaction = await Transaction.findOne({
             _id: transactionId,
             isPaid: false,
@@ -46,7 +46,7 @@ export const stripeWebhooks = async (request, response) => {
           await transaction.save();
         } else {
           return response.json({
-            recieved: true,
+            received: true,
             message: "Ignored event: Invalid app",
           });
         }
@@ -57,7 +57,7 @@ export const stripeWebhooks = async (request, response) => {
         console.log("Unhandled event type:", event.type);
         break;
     }
-    response.json({ recieved: true });
+    response.json({ received: true });
   } catch (error) {
     console.error("Webhook processing error:", error);
     response.status(500).send("Internal Server Error");

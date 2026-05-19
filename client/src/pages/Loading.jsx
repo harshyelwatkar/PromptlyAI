@@ -9,7 +9,7 @@ const Loading = () => {
       navigate("/");
     }, 8000);
     return () => clearTimeout(timeout);
-  }, []);
+  }, [navigate]);
 
   return (
     <div className="bg-gradient-to-b from-[#531B81] to-[#29184B] backdrop-opacity-60 flex items-center justify-center h-screen w-screen text-white text-2xl">
