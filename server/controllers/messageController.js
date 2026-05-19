@@ -108,6 +108,8 @@ export const imageMessageController = async (req, res) => {
       content: uploadResponse.url,
       timestamp: Date.now(),
       isImage: true,
+      isPublished,
+      userName: req.user.name,
     };
 
     // Send response to frontend
