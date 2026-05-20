@@ -65,12 +65,12 @@ const Sidebar = ({ isMenuOpen, setIsMenuOpen }) => {
       <img
         src={theme === "dark" ? assets.logo_full : assets.logo_full_dark}
         alt="PromptlyAI Logo"
-        className="w-auto h-10 sm:h-11 md:h-12 lg:h-14 shrink-0 self-start object-contain ml-1 -mt-1 mb-1"
+        className="w-auto h-10 sm:h-11 md:h-12 lg:h-14 shrink-0 self-start object-contain ml-2 mt-2 mb-1"
       />
       {/* New Chat Button */}
       <button
         onClick={createNewChat}
-        className="flex justify-center items-center w-full py-2 mt-10 text-white bg-gradient-to-r from-[#A456F7] to-[#3D81F6] text-sm rounded-md cursor-pointer"
+        className="flex justify-center items-center w-full py-2 mt-7 text-white bg-gradient-to-r from-[#A456F7] to-[#3D81F6] text-sm rounded-md cursor-pointer"
       >
         <span className="mr-2 text-xl">+</span> New Chat
       </button>
