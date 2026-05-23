@@ -51,12 +51,12 @@ export const textMessageController = async (req, res) => {
   }
 };
 
-// Image Generation Message Controller
+// Image Generation Message Controller (Powered by Pollinations.ai & ImageKit Storage)
 export const imageMessageController = async (req, res) => {
   try {
     const userId = req.user._id;
 
-    //Check Credits
+    // Check Credits
     if (req.user.credits < 2) {
       return res.json({
         success: false,
@@ -65,10 +65,10 @@ export const imageMessageController = async (req, res) => {
     }
     const { prompt, chatId, isPublished } = req.body;
 
-    //Find Chat
+    // Find Chat
     const chat = await Chat.findOne({ userId, _id: chatId });
 
-    //Push user messages
+    // Push user messages
     chat.messages.push({
       role: "user",
       content: prompt,
@@ -76,36 +76,43 @@ export const imageMessageController = async (req, res) => {
       isImage: false,
     });
 
-    //Encode the prompt
+    // Encode the prompt safely for URL transmission
     const encodedPrompt = encodeURIComponent(prompt);
 
-    //Construct Imagekit Ai generation URL
-    const generatedImageUrl = `${
-      process.env.IMAGEKIT_URL_ENDPOINT
-    }/ik-genimg-prompt-${encodedPrompt}/promptlyai/${Date.now()}.png?tr=w-800,h-800`;
+    // 🌟 FIX: Standard URL string concatenation to prevent getaddrinfo formatting errors
+    const generatedImageUrl =
+      "https://image.pollinations.ai/prompt/" +
+      encodedPrompt +
+      "?width=800&height=800&nologo=true&enhance=true";
 
-    //Trigger generation by fetching from ImageKit
+    // Trigger generation by fetching from Pollinations.ai
     const aiImageResponse = await axios.get(generatedImageUrl, {
       responseType: "arraybuffer",
     });
 
-    // Convert generated image buffer to Base64
-    const base64Image = `data:image/png;base64,${Buffer.from(
+    // Convert generated image buffer to Base64 (Pollinations outputs optimized JPEG data streams)
+    const base64Image = `data:image/jpeg;base64,${Buffer.from(
       aiImageResponse.data,
       "binary"
     ).toString("base64")}`;
 
-    // Upload to ImageKit Media Library
+    // Generate a clean slug for storage naming in your Media library
+    const urlSafeSlug = prompt
+      .toLowerCase()
+      .replace(/[^a-z0-9]/g, "-")
+      .slice(0, 30);
+
+    // Upload the free image to ImageKit for permanent static hosting (0 Extension Units used!)
     const uploadResponse = await imagekit.files.upload({
       file: base64Image,
-      fileName: `${Date.now()}.png`,
+      fileName: `${urlSafeSlug}-${Date.now()}.jpg`,
       folder: "promptlyai",
     });
 
     // Create AI reply object
     const reply = {
       role: "assistant",
-      content: uploadResponse.url,
+      content: uploadResponse.url, // Serves the permanent static ImageKit CDN link to your UI
       timestamp: Date.now(),
       isImage: true,
       isPublished,
@@ -125,6 +132,16 @@ export const imageMessageController = async (req, res) => {
     // Deduct 2 credits for image generation
     await User.updateOne({ _id: userId }, { $inc: { credits: -2 } });
   } catch (error) {
-    res.json({ success: false, message: error.message });
+    // Decodes raw error buffers into readable text string
+    const errorDetail =
+      error.response?.data instanceof Buffer
+        ? error.response.data.toString()
+        : error.response?.data || error.message;
+
+    console.error("AI Generation Error Details:", errorDetail);
+    res.json({
+      success: false,
+      message: "Failed to generate image. Please try again.",
+    });
   }
 };
